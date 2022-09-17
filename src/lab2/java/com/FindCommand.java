@@ -96,8 +96,13 @@ public class FindCommand extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         final String command = jTextField1.getText();
+        String commandTemplate = "cmd /c %s";
+        final String os = System.getProperty("os.name");
+        if (os.contains("Linux")) {
+            commandTemplate = "%s";
+        }
         // TODO add your handling code here:
-        final String rs = execCmd(String.format("cmd /c %s", command));
+        final String rs = execCmd(String.format(commandTemplate, command), os);
 
         if (rs == null) {
             JOptionPane.showMessageDialog(null, "Command is invalid! Please try again");
@@ -107,7 +112,34 @@ public class FindCommand extends javax.swing.JFrame {
         
     }//GEN-LAST:event_jButton1ActionPerformed
     
-    private String execCmd(String cmd) {
+    private String execCmd(String cmd, String os) {
+        if (os.contains("Linux")) {
+            return execCmdInLinux(cmd);
+        } else if (os.contains("Windows")) {
+            return execCmdInWindows(cmd);
+        }
+        return null;
+    }
+    
+    private String execCmdInLinux(String cmd) {
+        String rs = null;
+        
+        try {
+            String[] extendedCmd = { "/bin/sh", "-c", cmd };
+            Process p = Runtime.getRuntime().exec(extendedCmd);
+            p.waitFor();
+            InputStream is = p.getInputStream();
+            Scanner sc = new Scanner(is).useDelimiter("\\A");
+            rs = sc.hasNext() ? sc.next() : null;
+            is.close();
+            sc.close();
+        } catch (InterruptedException | IOException ex) {
+            Logger.getLogger(FindCommand.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        return rs;
+    }
+    
+    private String execCmdInWindows(String cmd) {
         String rs = null;
         try (InputStream is = Runtime.getRuntime().exec(cmd).getInputStream();
              Scanner sc = new Scanner(is).useDelimiter("\\A")) {
@@ -115,7 +147,7 @@ public class FindCommand extends javax.swing.JFrame {
         } catch (IOException ex) {
             ex.printStackTrace();
             Logger.getLogger(FindCommand.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
         return rs;
     }
     
