@@ -19,14 +19,27 @@
 
 package lab2.java.com;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Scanner;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class FindCommand extends javax.swing.JFrame {
+    
+    private ExecutorService ex = Executors.newFixedThreadPool(10);
     
     /** Creates new form Find */
     public FindCommand() {
@@ -47,6 +60,16 @@ public class FindCommand extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
+        jLabel2 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jTextField3 = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jTextField4 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Find");
@@ -62,6 +85,27 @@ public class FindCommand extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(jTextPane1);
 
+        jLabel2.setText("Iteration:");
+
+        jTextField2.setText("1");
+
+        jLabel3.setText("URL:");
+
+        jLabel4.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        jLabel4.setText("Local Command Finder");
+
+        jLabel5.setText("Port:");
+
+        jButton2.setText("Clear");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        jLabel6.setText("Server Command Finder");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -71,23 +115,66 @@ public class FindCommand extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jTextField2)
+                                    .addComponent(jTextField1)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                .addGap(11, 11, 11)
+                .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(4, 4, 4)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5)
+                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 441, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -96,61 +183,91 @@ public class FindCommand extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         final String command = jTextField1.getText();
-        String commandTemplate = "cmd /c %s";
-        final String os = System.getProperty("os.name");
-        if (os.contains("Linux")) {
-            commandTemplate = "%s";
+        if (jTextField2.getText() == null || jTextField2.getText().equals("")) {
+            jTextField2.setText("1");
         }
-        // TODO add your handling code here:
-        final String rs = execCmd(String.format(commandTemplate, command), os);
+        Integer parsedIteration = parsePositiveInteger(jTextField2.getText());
+        String ipAdd = jTextField3.getText();
+        String port = jTextField4.getText();
+        if (ipAdd.isBlank() && port.isBlank()) {
+            executeCommandOnLocalMachine(command, parsedIteration);
+        } else if (ipAdd.isBlank() || port.isBlank()) {
+            JOptionPane.showMessageDialog(null, "Please specify both server IP and port to execute commands on the server!");
+            return;
+        } else {
+            try {
+                Socket client_socket = new Socket(ipAdd, parsePositiveInteger(port));
 
-        if (rs == null) {
+                InputStreamReader isReader = new InputStreamReader(client_socket.getInputStream());
+                BufferedReader bf = new BufferedReader(isReader);
+                PrintWriter out = new PrintWriter(client_socket.getOutputStream(), true);
+
+                String response;
+
+                out.print(jTextField2.getText() + ";;" + command);
+                out.flush();
+                StringBuilder stringBuilder = new StringBuilder();
+                while (!(response = bf.readLine()).isEmpty()){
+                    stringBuilder.append(response).append('\n');
+                }
+                System.out.println("Response from Sever: " + stringBuilder);
+                jTextPane1.setText(stringBuilder.toString());
+                client_socket.close();
+            } catch(IOException ex) {
+                ex.printStackTrace();
+            }
+            
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void executeCommandOnLocalMachine(String command, Integer iteration) {
+        Set<Future<String>> futures = new HashSet<>();
+        for(int i = 1; i <= iteration; i++) {
+            Callable<String> callable = new CommandExecutor(command);
+            Future<String> future = ex.submit(callable);
+            futures.add(future);
+        }
+        List<String> rs = new ArrayList<>();
+        for(Future<String> f : futures) {
+            try {
+                rs.add(f.get());
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.getLogger(FindCommand.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if (rs.isEmpty() || rs.contains(null)) {
             JOptionPane.showMessageDialog(null, "Command is invalid! Please try again");
             return;
         }
-        jTextPane1.setText(rs);
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
-    
-    private String execCmd(String cmd, String os) {
-        if (os.contains("Linux")) {
-            return execCmdInLinux(cmd);
-        } else if (os.contains("Windows")) {
-            return execCmdInWindows(cmd);
+        for (int i = 0; i < rs.size(); i++) {
+            rs.set(i, String.valueOf(i + 1) + ".\n" + rs.get(i));
         }
-        return null;
+        jTextPane1.setText(String.join("\n", rs));
     }
     
-    private String execCmdInLinux(String cmd) {
-        String rs = null;
-        
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        jTextField1.setText("");
+        jTextField2.setText("");
+        jTextField3.setText("");
+        jTextField4.setText("");
+        jTextPane1.setText("");
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private Integer parsePositiveInteger(String integerStr) {
+        Integer integer = null;
         try {
-            String[] extendedCmd = { "/bin/sh", "-c", cmd };
-            Process p = Runtime.getRuntime().exec(extendedCmd);
-            p.waitFor();
-            InputStream is = p.getInputStream();
-            Scanner sc = new Scanner(is).useDelimiter("\\A");
-            rs = sc.hasNext() ? sc.next() : null;
-            is.close();
-            sc.close();
-        } catch (InterruptedException | IOException ex) {
-            Logger.getLogger(FindCommand.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        return rs;
-    }
-    
-    private String execCmdInWindows(String cmd) {
-        String rs = null;
-        try (InputStream is = Runtime.getRuntime().exec(cmd).getInputStream();
-             Scanner sc = new Scanner(is).useDelimiter("\\A")) {
-            rs = sc.hasNext() ? sc.next() : null;
-        } catch (IOException ex) {
+            integer = Integer.valueOf(integerStr);
+            if (integer < 0) {
+                throw new NumberFormatException("The input string integer is negative");
+            }
+        } catch (NumberFormatException ex) {
             ex.printStackTrace();
-            Logger.getLogger(FindCommand.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Command is invalid! Please try again");
+            throw ex;
         }
-        return rs;
+        return integer;
     }
-    
     /**
      * @param args the command line arguments
      */
@@ -185,13 +302,24 @@ public class FindCommand extends javax.swing.JFrame {
                 new FindCommand().setVisible(true);
             }
         });
+        
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
     
